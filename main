@@ -1,0 +1,29 @@
+import pandas as pd
+from datetime import date
+
+# 1) Загрузка CSV в DataFrame
+df = pd.read_csv("people-100.csv")
+
+# 2) Быстрая статистика по числовым столбцам
+print("Описание данных:\n", df.describe())
+
+# 3) Преобразовать колонку с датой рождения в dataframe тип
+df["dob"] = pd.to_datetime(df["Date of birth"], format="%Y-%m-%d")
+
+# 4) Вычисление возраста на сегодня
+today = date.today()  # Дата сегодня
+birthday_passed = (today.month > df["dob"].dt.month) | (
+    (today.month == df["dob"].dt.month) & (today.day >= df["dob"].dt.day)
+)  # Был ли уже день рождения
+df["age"] = (
+    today.year - df["dob"].dt.year - (~birthday_passed).astype(int)
+)  # Список по возрасту с учетом дня рождения в этом году
+
+# 5) Отфильтровали по возрасту
+filtered = df[df["age"] > 37]
+
+# 6) Сохранение результата в новый CSV
+filtered.to_csv("filtered_data.csv", index=False)
+
+# 7) Вывод текста
+print("\nФильтрация завершена: записано", len(filtered), "строк в 'filtered_data.csv'")
